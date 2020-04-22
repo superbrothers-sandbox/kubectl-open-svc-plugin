@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+    paths-ignore: ['**.md']
+  pull_request:
+    types: [opened, synchronize]
+    paths-ignore: ['**.md']
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-go@v2
+      with:
+        go-version: '^1.13.1'
+    - run: make vet
+    - run: make fmt
+    - run: make build
+    - run: make dist
+    - run: ./hack/install-krew.sh
+    - run: make test-dist
+    - uses: actions/upload-artifact@v2-preview
+      with:
+        name: my-artifact
+        path: _dist/*
